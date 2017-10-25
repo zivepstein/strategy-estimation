@@ -23,6 +23,6 @@ This folder contains matlab scripts that runs the maximum likelihood estimaton f
 likelihood calculation and prints the estimated probability of each strategy, as well as the estimation for gamma. 
 
 <h2>gbu regression</h2>
-This folder contains the R scripts used in the Good Back Ugly EC paper. ``functions.R`` contains the functions used to generate the models, and ```ec_main_analysis.R``` contains the calls to these functions which generates the point estimates and plots found in the paper. `unilateral-giving-data.csv`contains the game data used for the analysis. 
+This folder contains the R scripts used in the Good Back Ugly EC paper. `functions.R` contains the functions used to generate the models, and `ec_main_analysis.R` contains the calls to these functions which generates the point estimates and plots found in the paper. `unilateral-giving-data.csv`contains the game data used for the analysis. 
 
 
