@@ -1,10 +1,17 @@
-setwd("/Users/ziv/GDrive/research/hcl/coop-pred-ec/camera-code")
+wd <- "/Users/zive/GDrive/research/hcl/2016/coop-pred-ec/camera-code"
+setwd(wd)
 library("glmnet")
 library("dplyr")
 library("Matrix")
 library(foreach)
 source("functions.R")
 library(ROCR)
+#returns a list with the following elements: 1: decision level disposition data (21340x28)
+#                                            2: decision level Situation data, (21340x7)
+#                                            3: subject ids, (21340x1)
+#                                            4: decisions, 0/1 did you cooperate,  (21340x1), used to generate figure 1
+#                                            5: dec_num 1..20,
+#                                            6: Sit2)
 l <- getData()
 demo <- l[[1]]
 Situation <- l[[2]]
@@ -12,31 +19,24 @@ id <- l[[3]]
 dec <- as.factor(as.vector(as.matrix(l[[4]])))
 dec_num <- l[[5]]
 
-##############################
-## repRidge AUC :  0.6744231 #
+#figure 1
+string_id <- c()
+for (i in 1:nrow(id)){
+  string_id <- toString()
+}
+coopz <- c()
+data <- data.frame(dec,dec_num,as.matrix(id))
+i <- 1
+for (ids in unique(as.matrix(id))){
+  subset <- data[which(data$id == ids),]
+  coopz[i] <-sum(as.numeric(subset$dec[which(subset$dec_num <16)])-1)
+  i <- i +1
+}
+
+hist(coopz, col='chartreuse3', xlab = "Participant's number of cooperative decisions in training set", ylab = 'Density', main="",freq=F, cex.lab=.85)
 
 
-## 2 type, k=5,    0.8451734 #
-
-# 3 type, k=2,K=8  0.8702254
-
-###just fe:        0.8317196
-
-
-###rep ridge
-repRidge <- runRepRegression (y=dec, X=Situation, id=id, dec_num=dec_num, self.interact = "true", squares = "true", alpha = 0, nfolds = 5) 
-model <- repRidge[[1]]
-ytest <- repRidge[[2]]
-xtest <- repRidge[[3]]
-
-yhat <- predict(model, xtest)
-
-performance(prediction(yhat,ytest),"auc")@y.values[[1]] 
-
-########################
-
-##2 type
-
+##2 type, Figure 2
 auczD <-c()
 
 for (k in 1:15){
@@ -53,8 +53,7 @@ for (k in 1:15){
   print(paste("Finished K=", k, " with AUC of ", auczD[k] , sep=""))
 }
 
-##3 type
-
+##3 type, Figure 3
 aucz2D <- matrix(rep(0,15^2),nrow=15)
 
 for (k in 1:15){
@@ -97,7 +96,6 @@ for (i in 1:15){
 ###fixed effects X situation
 ridge.feXsit <- runFexSitRegression(dec, Situation, id, dec_num)
                                    
-
 model <- ridge.feXsit[[1]]
 ytest <- ridge.feXsit[[2]]
 xtest <- ridge.feXsit[[3]]
@@ -138,11 +136,6 @@ library(gplots)
 heatmap.2(nad, dendrogram = "none", trace = "none", 
           Rowv = F, Colv=F, col=rev(rainbow(50,start = .08, end=.25)), 
           tracecol="black", cellnote=round(nad,3),   notecol="black", xlab = "k", ylab = 'j', main = "",srtCol=0)
-
-
-heatmap.2(nad, dendrogram = "none", trace = "none",
-          Rowv = F, Colv=F, col=rev(rainbow(50,start = .08, end=.25)),
-          tracecol="black", cellnote=round(nad,3),   notecol="black", xlab = "Upper Bound", ylab = 'Lower Bound',srtCol=0)
 
 #random forest for class prediction (we tried this but did not include in the paper itself)
 giverData <- buildGiverModel(dec, demo,k=1,K=6, id, dec_num, squares = "false",alpha = 0, nfolds = 5, type= "within", interact=FALSE)
@@ -215,7 +208,7 @@ isCoop = as.factor(type == 2)#iii) predict "gave 6+ vs "gave 0 or gave 1-5
 extreme = as.factor(type[which(type != 1)] == 0) #iv) predict "gave 0" vs "gave 6+"
 extremeData <- giverData[which(type != 1),]
 
-################
+################random forest analysis. not included in paper.
 
 train <- sample( 1:length(type),2*length(type)/3)
 greedRF <- randomForest(isGreed ~ ., data=cbind(giverData,isGreed)[train,], importance=TRUE,proximity=TRUE)
@@ -234,8 +227,7 @@ z <- predict(coopRF, giverData[-train,])
 coopAUC <- performance(prediction(as.numeric(z),isCoop[-train]),"auc")@y.values[[1]] 
 importance(coopRF)
 
-##########
-
+##########comparision of individuals across type. not included in paper
 giverData <-giverData[charF,-c(1,48:50)]
 gtypeRF_no_interaction
 
@@ -256,58 +248,7 @@ rownames(output) <- colnames(type3)
 
 barplot(data, col= grDevices::rainbow(5), ylim = c(.5,.9), xpd=F, ylab="AUC")
 
-
-#generate fig 1
-string_id <- c()
-for i in 1:nrow(id){
-  string_id <- toString()
-}
-
-coopz <- c()
-data <- data.frame(dec,dec_num,as.matrix(id))
-i <- 1
-for (ids in unique(as.matrix(id))){
-  subset <- data[which(data$id == ids),]
-  coopz[i] <-sum(as.numeric(subset$dec[which(subset$dec_num <16)])-1)
-  i <- i +1
-}
-
-
-hist(coopz, col='chartreuse3', xlab = "Participant's number of cooperative decisions in training set", ylab = 'Density', main="",freq=F, cex.lab=.85)
-
-####next fig
-data <- c(0.7-.1*16/79,0.8+.1*17.66/79, 0.834, 0.8+.1*22.16/79,0.8+.1*24/79,0.8+.1*27/79,0.8+.1*21/79,0.8+.1*8.66/79,0.8+.1*4.16/79,0.8-.1*8.66/79,0.8-.1*22.813/79,0.8-.1*36.5/79,0.8-.1*44.5/79,0.7+.1*25/79,0.7+.1*19.33/79,0.7+.1*5.66/79)
-plot(0:15,data, xlab = "k", ylab= "AUC", pch=16, ylim=c(0.5,0.9))
-points(2,0.8333, pch=16,col='red',cex=1.5)
-abline(v=2, lty=3)
-lines(0:15,data, col='lightpink2')
-text( 2.8,0.873,"0.833")
-
 ###fig 5
 cluster_data <- c(0,.6+.2*7.85/41,.8+.2*3.125/41,.8+.2*15/41,.8+.2*17.5/41,.8+.2*20.75/41,.8+.2*23.67/41,.8+.2*25.66/41,.8+.2*26.91/41,.8+.2*25.04/41)
 plot(cluster_data, ylab = "Percent Variance Explained", xlab = "Number of Clusters", ylim=c(0,1),pch=16)
 lines(cluster_data,col= "chartreuse3")
-
-
-###
-A = unique(lapply(id[[1]], toString)
-unik <- find.firsts(A)
-demo_type <- data.frame(demo,type)
-dim(demo_type[unik,])
-
-
-###between sample 
-
-betweenRidge <- runBetweenRegression (y=dec, Disposition=Disposition, Situation=Situation, id=id, dec_num=dec_num,
-                                  self.interact = "true", interact.between = "true", squares = "true",
-                                  alpha = 0, nfolds = 5, checkCross = "true")
-model <- betweenRidge[[1]]
-ytest <- betweenRidge[[2]]
-xtest <- betweenRidge[[3]]
-
-yhat <- predict(model, xtest)
-
-performance(prediction(yhat,ytest),"auc")@y.values[[1]] 
-
-s<- data.frame(id,type,demo)
-write.csv(out,"/Users/ziv/GDrive/research/hcl/coop-pred-ec/camera-code/demo_type2.csv")
