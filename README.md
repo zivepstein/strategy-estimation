@@ -19,10 +19,10 @@ Hartford, Jason S., James R. Wright, and Kevin Leyton-Brown. "Deep learning for 
 
 <h2>Sfem demo</h2>
 This folder contains matlab scripts that runs the maximum likelihood estimaton from the Slow to Anger and Fast to Forgive paper. 
-`master_MLE_script.m` runs the entire analysis for the s1 data file with 12 participants and 3 strategies. <b>boots_launcher.m</b> runs the boostrapped
+<b>master_MLE_script.m</b> runs the entire analysis for the s1 data file with 12 participants and 3 strategies. <b>boots_launcher.m</b> runs the boostrapped
 likelihood calculation and prints the estimated probability of each strategy, as well as the estimation for gamma. 
 
 <h2>Good Bad Ugly 2016</h2>
-This folder contains the R scripts used in the Good Back Ugly EC paper. <b>functions.R</b> contains the functions used to generate the models, and <b>ec_main_analysis.R</b> contains the calls to these functions which generates the point estimates and plots found in the paper. <b>unilateral-giving-data.csv</b>contains the game data used for the analysis. 
+This folder contains the R scripts used in the Good Back Ugly EC paper (1). <b>functions.R</b> contains the functions used to generate the models, and <b>ec_main_analysis.R</b> contains the calls to these functions which generates the point estimates and plots found in the paper. <b>unilateral-giving-data.csv</b>contains the game data used for the analysis. 
 
 
